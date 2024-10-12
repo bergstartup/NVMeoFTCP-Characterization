@@ -1,0 +1,42 @@
+#!/usr/bin/bpftrace
+
+
+#include <linux/skbuff.h>
+#include <linux/blk-mq.h>
+#include <net/sock.h>
+
+config = {
+ max_map_keys=460000
+}
+
+kfunc:tcp_v4_rcv{
+
+}
+
+kfunc:nvmet_parse_io_cmd{
+
+}
+
+
+//Use to get the tag
+kretprobe:blk_mq_get_tag{
+
+}
+
+
+kfunc:nvme_setup_cmd{
+
+}
+
+kfunc:nvme_complete_rq{
+
+}
+kfunc:nvme_complete_batch_req{
+
+}
+
+
+//Start for response process for TCP
+
+//When the response leaves
+

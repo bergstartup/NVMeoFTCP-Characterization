@@ -1,0 +1,193 @@
+#!/usr/bin/bpftrace
+
+
+#include <linux/skbuff.h>
+#include <linux/blk-mq.h>
+#include <net/sock.h>
+
+config = {
+ max_map_keys=500000
+}
+
+
+kfunc:blk_mq_get_tag {
+ if((strncmp("fio",comm, 3) == 0)) {
+  //Do lowest pid sampling for certain time
+  $count = @process_count[comm];
+  @process_count[comm] = $count + 1;
+  
+  $epid = @fio_pids[comm];
+  if(($epid == 0) || (pid <= $epid)) { 
+    @fio_pids[comm] = pid;
+    $epid = pid;
+  }
+
+  //After certain time, use the so far identified lowest pid
+  if(($count + 1 > 120) && ($epid == pid)) {
+    printf("------------------\n");
+    printf("Identified lowest PID : %d\n", pid);
+    $data = (struct blk_mq_alloc_data *) args.data;
+    $driver = (struct nvme_tcp_queue *) $data->hctx->driver_data;
+    $port = $driver->sock->sk->__sk_common.skc_num;
+    
+    //Marks pid to specific nvmeof i/o queue
+    @pid_to_port[pid] = $port;  
+
+    printf("PID to Port: %d %d\n", pid, $port);
+  } //End of smallest fio pid and min sampling
+ } //End of fio
+} 
+
+/*
+* T1 as per the diagram; Entry to the block layer
+*/
+//Planning to use port of hctx
+//(blk_mq_alloc_data *) args.data->hctx->driver_data->sock->sk->__sk_common.skc_num
+//Look about the sched_tags
+kretprobe:blk_mq_get_tag{
+  $entry_ts = nsecs;
+  
+  //Get the port(nvmeof i/o queue) for the pid
+  $port = @pid_to_port[pid]; 
+  if($port != 0) {
+   printf("block layer => port:%d pid:%d tag:%d ts:%ld\n", $port, pid, retval, $entry_ts);
+   
+   //Mark the entry to the block layer with port, tag
+   @block_entry_ts[$port, retval] = $entry_ts;  
+  }
+}
+
+
+/*
+* T2 as per the diagram; Entry to NVMeoF layer
+*/
+kretfunc:nvme_setup_cmd{
+ $entry_ts = nsecs;
+ $rq = (struct request *) args.req;
+ $data = (struct nvme_tcp_queue *) $rq->mq_hctx->driver_data;
+ $port = $data->sock->sk->__sk_common.skc_num;
+
+ //Get block time of the request with port, tag
+ $block_time = @block_entry_ts[$port, $rq->tag];
+ 
+ if($block_time != 0) {
+  $nvme_req = (struct nvme_request *) ($rq+1);
+  //Mark the entry to NVMeoF layer with port, cid
+  @nvmeof_entry_ts[$port, $nvme_req->cmd->common.command_id] = $entry_ts;
+  //Meta for port,tag to cid
+  @tag_to_cid[$port, $rq->tag] = $nvme_req->cmd->common.command_id;
+  printf("nvmeof layer => port:%d pid:%d id:%d ts:%ld\n", $port, pid, $nvme_req->cmd->common.command_id, $entry_ts);
+ }
+}
+
+
+/*
+* T3 as per the diagram : Entry to the TCP processing;
+*/
+kfunc:nvme_tcp_try_send_cmd_pdu{
+ $entry_ts = nsecs;
+ $rq = (struct nvme_tcp_request *) args.req;
+ $port = $rq->queue->sock->sk->__sk_common.skc_num;
+ $nvme_req = (struct nvme_tcp_cmd_pdu *) $rq->pdu;
+ //Get the nvme time using the port, cid
+ $nvme_time = @nvmeof_entry_ts[$port, $nvme_req->cmd.rw.command_id];
+ if($nvme_time != 0) {
+  //Mark the worker entry
+  @worker_entry_ts[$port, $nvme_req->cmd.rw.command_id] = $entry_ts;
+  //worker meta port, init worker pid to cid
+  @worker_meta[$port,pid] = $nvme_req->cmd.rw.command_id;
+  printf("worker layer => port:%d pid:%d id:%d ts:%ld\n",$port, pid, $nvme_req->cmd.rw.command_id, $entry_ts);
+ }
+}
+
+kfunc:sock_sendmsg {
+ $msg = (struct msghdr *) args.msg;
+ $sock = (struct socket *) args.sock;
+ $port = $sock->sk->__sk_common.skc_num;
+ //Use worker meta port, init worker pid to get the cid
+ $cid = @worker_meta[$port, pid];
+ if($cid != 0) {
+  $f = $msg->msg_iter.bvec;
+  //Create sock meta for iovector data to cid
+  @sock_meta[$f->bv_page, $f->bv_offset, $f->bv_len] = $cid;
+  printf("BV from the send msg : %d %p %d %d\n",$port, $f->bv_page, $f->bv_offset, $f->bv_len);
+ }
+}
+
+
+
+/*
+*T4 as per the diagram. End of worker processing and exit of the initiator
+*/
+kfunc:__dev_queue_xmit {
+ $entry_ts = nsecs;
+ $skb = (struct sk_buff *)args.skb;
+ $port = $skb->sk->__sk_common.skc_num;
+ $bvec = (struct bio_vec *) ($skb->data+114);
+ //Use sock meta from iovector data to cid
+ $cid = @sock_meta[$bvec->bv_page, $bvec->bv_offset, $bvec->bv_len];
+ 
+ if($cid != 0) { 
+  //Mark the exit of the initiator using port, cid
+  @init_exit_ts[$port, $cid] = $entry_ts;
+  printf("netdev layer => port:%d cid:%d ts:%ld\n", $port, $cid, $entry_ts);
+ }
+}
+
+/*
+kfunc:tcp_v4_rcv {
+ $skb = (struct sk_buff *)args.skb;
+ 
+ if(($skb->dev->real_num_tx_queues > 1) && ($skb->data_len > 0)) {
+  printf("%rx\n",buf($skb->data, 64));
+ }
+}
+*/
+
+
+/*
+* T7 as per the diagram. End of NVMeoF request completion
+*/
+kfunc:nvme_complete_rq {
+ $entry_ts = nsecs;
+ $rq = (struct request *)args.req;
+ $data = (struct nvme_tcp_queue *) $rq->mq_hctx->driver_data;
+ $port = $data->sock->sk->__sk_common.skc_num;
+ //Get command id from port, tag
+ $cid = @tag_to_cid[$port, $rq->tag];
+ //Get init exit time using port, cid
+ $ie = @init_exit_ts[$port, $cid];
+ if($ie > 0) {
+  printf("NVMoF completion => port:%d cid:%d tag:%d ts:%ld\n", $port, $cid, $rq->tag, $entry_ts);
+  //Fill the tuple
+  $block = @nvmeof_entry_ts[$port, $cid] - @block_entry_ts[$port, $rq->tag];
+  $nvmeof = @worker_entry_ts[$port, $cid] - @nvmeof_entry_ts[$port, $cid];
+  $init_worker = @init_exit_ts[$port, $cid] - @worker_entry_ts[$port, $cid];
+  $target = $entry_ts - @init_exit_ts[$port, $cid]; 
+  $e2e = $entry_ts - @block_entry_ts[$port, $rq->tag];
+  @microbench[$e2e] = ($block, $nvmeof, $init_worker, $target, $e2e);
+ }
+}
+
+
+/*
+* T8 as per the diagram. Block layer end
+*/
+kfunc:bio_endio {
+ //printf("Last\n");
+}
+
+END {
+clear(@sock_meta);
+clear(@tag_to_cid);
+clear(@worker_meta);
+clear(@block_entry_ts);
+clear(@nvmeof_entry_ts);
+clear(@worker_entry_ts);
+clear(@init_exit_ts);
+//clear(@tag_to_pid);
+clear(@pid_to_port);
+clear(@fio_pids);
+clear(@process_count);
+//clear(@microbench)
+}

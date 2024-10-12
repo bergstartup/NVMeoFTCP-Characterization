@@ -1,0 +1,104 @@
+#!/usr/bin/bpftrace
+
+#include<string.h>
+kfunc:dd_init_sched {
+ $rqq = (struct request_queue * )args.q;
+ printf("Number of hw queue : %d\n",$rqq->nr_hw_queues);
+}
+
+/*
+kfunc:blk_mq_submit_bio {
+ $bio = (struct bio *) args.bio;
+ if(strncmp(comm,"fio",3)==0) {
+  printf("Plug : %p\n",curtask->plug);
+  printf("Bio flags : %d\n", $bio->bi_opf);
+ }
+}
+kfunc:nvme_tcp_poll {
+ $entry = nsecs;
+ $lastEntry = @pollMeta[pid].0;
+ $diff = @pollMeta[pid].1 + ($entry - $lastEntry);
+ $count = @pollMeta[pid].2 + 1;
+ if($lastEntry == 0) {
+  $diff = 0;
+  $count = 0;
+ }
+ @pollMeta[pid] = ($entry, $diff, $count);
+}
+
+kretprobe:nvme_tcp_poll {
+ 
+}
+*/
+
+kfunc:sch_direct_xmit {
+ //Check if netdev mtu is 9000 bytes
+ $dev = (struct net_device *) args.dev;
+ $q = (struct Qdisc *) args.q;
+ $qdisc = $q->qstats;
+ if($dev->mtu == 9000) {
+  //printf("Stats : len : %d, bl: %d, dr: %d, rq: %d, ol:%d\n",$qdisc.qlen,$qdisc.backlog,
+  //$qdisc.drops, $qdisc.requeues, $qdisc.overlimits);
+  $count = @net_tx_queue_stats[cpu].0 + (uint64)1;
+  @net_tx_queue_stats[cpu] = ($count, $qdisc.qlen,$qdisc.backlog,
+  $qdisc.drops, $qdisc.requeues, $qdisc.overlimits);
+  //printf("%ld %ld : ", $stats->bytes.v.a, $stats->packets.v.a);
+ }
+}
+
+
+
+/*
+//Marks exit of the fio
+//So, it records the run time
+kfunc:schedule {
+ $entryts = nsecs;
+ if(strncmp("fio",comm,3) == 0) {
+  //Takes count of how many runs
+  $count = @run[pid, tid].0 + 1;
+  //Time updated in gap map will be the sched time
+  if(@gap[pid, tid].2 == 0) {
+   printf("Failed\n");
+  }
+  $schedts = $entryts - @gap[pid, tid].2;
+  $run_time = @run[pid, tid].1 + $schedts; 
+  @run[pid, tid] = ($count, $run_time, $entryts); 
+ 
+ }
+}
+
+
+//Marks the entry to fio
+//So, it records the gap time
+kretprobe:schedule {
+ $entryts = nsecs;
+ if(strncmp("fio",comm,3) == 0) {
+  if(@run[pid, tid].2 != 0) {
+   $count = @gap[pid, tid].0 + 1;
+   //Time updated in gap map will be the sched time
+   $pulledts = $entryts - @run[pid, tid].2;
+   $run_time = @gap[pid, tid].1 + $pulledts; 
+   @gap[pid, tid] = ($count, $run_time, $entryts); 
+  } else {
+   @gap[pid, tid] = ((uint64)0, (uint64)0, $entryts); 
+  }
+ }
+}
+*/
+
+
+/*
+kretprobe:schedule {
+ if(strncmp(comm,"fio",3) == 0) {
+  $entry = nsecs;
+  $lastEntry = @pollMeta[pid, tid].0;
+  $diff = @pollMeta[pid, tid].1 + ($entry - $lastEntry);
+  $count = @pollMeta[pid, tid].2 + 1;
+  if($lastEntry == 0) {
+   $diff = 0;
+   $count = 0;
+  }
+  @pollMeta[pid, tid] = ($entry, $diff, $count);
+ }
+}
+*/

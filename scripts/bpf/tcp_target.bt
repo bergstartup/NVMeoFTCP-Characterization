@@ -1,0 +1,19 @@
+#!/usr/bin/bpftrace
+#include<string.h>
+BEGIN
+{
+}
+
+kfunc:nvmet_bdev_execute_rw
+{
+	@nvmet_bio_sumbit_cpu[cpu]++;
+}
+
+kfunc:nvmet_bio_done
+{
+	@nvmet_bio_done_cpu[cpu]++;
+}
+
+END
+{
+}

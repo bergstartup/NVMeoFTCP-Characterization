@@ -1,0 +1,16 @@
+[global]
+filename=${DEVICE}
+ioengine=io_uring
+fixedbufs=1
+registerfiles=1
+sqthread_poll=1
+hipri=1
+direct=1
+bs=4k
+size=100%
+numjobs=8
+
+[steady-state-test]
+rw=randwrite
+iodepth=128
+

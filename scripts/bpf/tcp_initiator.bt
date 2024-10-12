@@ -1,0 +1,59 @@
+#!/usr/bin/bpftrace
+#include<string.h>
+BEGIN
+{
+}
+
+kfunc:mlx5e_handle_rx_cqe_mpwrq
+{
+	$rq = (struct mlx5e_rq *)args.rq;
+	@recv_mlx5_queue[$rq->ix]++;
+	@recv_mlx5_cpu[cpu]++;
+}
+
+//Not working
+kretfunc:tcp_gro_receive
+{
+	$skb = (struct sk_buff *)args.skb;
+	$sk = ((struct sock *) $skb->sk);
+
+        $cip = (uint32)pton("172.16.137.3");
+        // Filter packets by IP address
+        if ($sk->__sk_common.skc_daddr == $cip) {
+                @recv_tcp_cpu[cpu]++;
+                @recv_tcp_port[$sk->__sk_common.skc_num]++;
+        }
+}
+
+kfunc:tcp_v4_rcv
+{
+    	$skb = (struct sk_buff *)args.skb;
+  	$sk = ((struct sock *) $skb->sk);
+	
+	$cip = (uint32)pton("172.16.137.2");
+    	
+	// Filter packets by IP address
+    	if ($sk->__sk_common.skc_daddr == $cip) {
+		@send_tcp_cpu[cpu]++;
+		@send_mlx5_queue[$skb->queue_mapping]++;
+		@send_tcp_port[$sk->__sk_common.skc_num]++;
+    	}
+}
+
+
+kfunc:ip_output
+{
+	$skb = (struct sk_buff *)args.skb;
+	$sk = ((struct sock *) $skb->sk);
+
+        $cip = (uint32)pton("172.16.137.2");
+
+        // Filter packets by IP address
+        if ($sk->__sk_common.skc_daddr == $cip) {
+        	//printf("Data len : %d\n", $skb->data_len);
+	}
+}
+
+END
+{
+}

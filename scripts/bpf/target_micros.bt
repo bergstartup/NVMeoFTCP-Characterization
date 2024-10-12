@@ -1,0 +1,68 @@
+#!/usr/bin/bpftrace
+
+
+kfunc:nvme_setup_cmd {
+ //For now we trace 
+ if(cpu == 0) {
+  $rq = (struct request *)args.req;
+  $nvme_req = (struct nvme_request *) ($rq+1);
+  //printf("Start CID : %d\n",$nvme_req->cmd->common.command_id);
+  //printf("Start tag : %d\n",$rq->tag);
+  @track[$rq->tag] = (nsecs);
+ }
+}
+
+
+kfunc:nvme_complete_batch_req {
+  if(cpu == 0) {
+   $entryts = nsecs;
+   $rq = (struct request *)args.req;
+   $nvme_req = (struct nvme_request *) ($rq+1);
+   $startts = @track[$rq->tag];
+   //printf("Batch CID : %d\n",$nvme_req->cmd->common.command_id);
+   //printf("End tag : %d\n",$rq->tag);
+   if($startts != 0) {
+    @blk_histo[cpu] = lhist(($entryts - $startts)/1000, 10, 16000, 100);
+    @blk_max[cpu] = max(($entryts - $startts)/1000);
+    @blk_count[cpu] = count();
+  }
+ }
+}
+
+
+kfunc:dev_hard_start_xmit {
+ if(cpu == 0) {
+  @in[cpu] = nsecs;
+ }
+}
+
+kretprobe:dev_hard_start_xmit {
+ $startts = nsecs;
+ if(cpu == 0) {
+  @net_max[cpu] = max(($startts - @in[cpu])/1000);
+  @net_histo[cpu] = lhist(($startts - @in[cpu])/1000, 0, 100, 10); 
+  @net_count[cpu] = count();
+ }
+}
+
+/*
+kfunc:blk_mq_start_request {
+ $rq = (struct request *)args.rq;
+ printf("Start tag : %s %d\n", comm,$rq->tag);
+}
+
+kfunc:blk_mq_complete_request {
+ $rq = (struct request *)args.rq;
+ printf("End tag : %s %d\n", comm,$rq->tag);
+}
+
+
+kfunc:rq_qos_done {
+ $rq = (struct request *)args.rq;
+ printf("start : %ld\n",$rq->io_start_time_ns);
+}
+*/
+END {
+ clear(@in);
+ clear(@track);
+}
