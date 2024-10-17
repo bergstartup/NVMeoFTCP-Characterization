@@ -10,7 +10,7 @@ This repository contains experiment setup, scripts and artifacts for my MSc thes
 #Register NVMe SSDs to the NVMeoF-TCP module
 cd scripts/setup
 ./nvmeof_target_init.sh <device> <count>
-#Execute the HTTP server(Blocking) in target for dynamic modification of target configurations for experiments
+#Execute the HTTP server(Blocking) in the target for dynamic modification of target configurations for experiments
 cd scripts/monitor
 python3 remoteServer.py
 </pre>
