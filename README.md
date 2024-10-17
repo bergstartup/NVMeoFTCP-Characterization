@@ -29,8 +29,6 @@ cd scripts/benchmark/fio/performance
 python3 crunching.py  
 </pre>
 
-<h1>Graphs</h1>
-To obtain graphs of above experiments
 
 <h2>RQ2: What is the performance overhead of NVMeoF-TCP compared to local NVMe?</h2>
 
@@ -38,3 +36,7 @@ To obtain graphs of above experiments
 <h2>RQ3: What is the performance interference with various loads on compute resources in NVMeoF-TCP?</h2>
 <h3>Initiator interference</h3>
 <h3>Target interference</h3>
+
+
+<h1>Graphs</h1>
+To obtain graphs of the above experiments
