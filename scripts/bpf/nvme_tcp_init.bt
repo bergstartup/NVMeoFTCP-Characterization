@@ -1,0 +1,29 @@
+#!/usr/bin/bpftrace
+#include<linux/container_of.h>
+
+kfunc:nvme_tcp_create_ctrl{
+    // Dereference the pointer to nvmf_ctrl_options to access nr_io_queues
+    $opts = (struct nvmf_ctrl_options *)args.opts;
+    printf("nvme_tcp_create_ctrl called. opts->nr_io_queues = %d %d\n", $opts->nr_io_queues, $opts->nr_poll_queues);
+}
+
+/*
+kretfunc:nvme_tcp_alloc_queue{
+    $nctrl = (struct nvme_ctrl *)args.nctrl;
+    $qid = args.qid;
+    $offset = offsetof(struct nvme_tcp_ctrl, ctrl);
+    printf("Offset %d\n",$offset);
+    $ctrl = (struct nvme_tcp_ctrl *)($nctrl - $offset);
+    // Access the queue pointer at index qid
+    $queue_ptr = $ctrl->queues + $qid;
+
+    // Dereference the pointer to access members of struct nvme_tcp_queue
+    $queue = *((struct nvme_tcp_queue *) $queue_ptr);
+    printf("nvme_tcp_set_queue_io_cpu called, queue->io_cpu: %d\n", $ctrl->ctrl.queue_count);
+}
+*/
+
+kfunc:nvme_tcp_init_hctx {
+  $id = args.hctx_idx;
+  printf("Id %d",$id);
+}

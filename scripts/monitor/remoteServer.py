@@ -128,12 +128,12 @@ class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
         port = query['port'][0]
         id = query['id'][0]
         queue = query['q'][0]
-        command = "exec ../setup/flow_control.sh {} {} {}".format(port, id, queue)
+        command = "exec ../setup/flow_action.sh {} {} {}".format(port, id, queue)
         subprocess.run(command, shell=True)
 
     def handle_rfctrl(self, query):
-        total = query['total']
-        for i in range(total):
+        total = query['total'][0]
+        for i in range(int(total)):
             command = "exec ethtool -N ens6np0 delete {}".format(i)
             subprocess.run(command, shell=True)
 

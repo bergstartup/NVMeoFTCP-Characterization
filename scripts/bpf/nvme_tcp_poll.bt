@@ -1,0 +1,5 @@
+#!/usr/bin/bpftrace
+kfunc:nvme_tcp_poll
+{
+	@poll_cpu[cpu]++	
+}

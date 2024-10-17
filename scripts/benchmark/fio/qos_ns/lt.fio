@@ -7,11 +7,11 @@ ioengine=io_uring
 fixedbufs=1
 registerfiles=1
 direct=1
-hipri=0
+hipri=1
 
 [latency]
 readwrite=${FOP}
-iodepth=1
+iodepth=${FQD}
 numjobs=1
 bs=4k
 cpus_allowed=0
@@ -22,6 +22,7 @@ numjobs=${BCOUNT}
 iodepth=128
 readwrite=${BOP}
 bs=${BBSIZE}
+rate_iops=${IOPS_LIM}
 cpus_allowed=1-9
 cpus_allowed_policy=split
 filename=${BDEVICE}

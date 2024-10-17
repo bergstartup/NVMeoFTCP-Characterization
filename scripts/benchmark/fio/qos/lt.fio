@@ -7,21 +7,21 @@ ioengine=io_uring
 fixedbufs=1
 registerfiles=1
 direct=1
+hipri=0
 
 [latency]
 readwrite=${FOP}
-iodepth=1
+iodepth=${FQD}
 numjobs=1
 bs=4k
-hipri=${FPOLL}
-prio=${FPRIO}
-nice=${FNICE}
+cpus_allowed=0
 filename=${FDEVICE}
 
 [throughput]
 numjobs=${BCOUNT}
 iodepth=128
+rate_iops=${IOPS_LIM}
 readwrite=${BOP}
 bs=${BBSIZE}
-hipri=0
 filename=${BDEVICE}
+cpus_allowed=0

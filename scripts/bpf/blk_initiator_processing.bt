@@ -1,0 +1,46 @@
+#!/usr/bin/bpftrace
+//This bpf trace script is used to track how much time is spent
+//from the block request submission to the exit of the correnspding
+//NVMEoF-TCP packet to the NET TX queue.
+
+//This script assumes there is no I/O scheduler and the processing is done
+//by the same pid as of the application
+
+kfunc:blk_mq_get_tag {
+ if((strncmp("fio",comm, 3) == 0)) {
+  @obs[pid] = nsecs;
+ }
+}
+
+
+tracepoint:net:net_dev_start_xmit {
+ $entryts = nsecs;
+ $blk = @obs[pid];
+ if($blk != 0) {
+  $diff = ($entryts - $blk)/1000;
+  @compute_histo[pid] = lhist($diff, 0, 2000, 100);
+  @compute_count[pid] = count();
+  @compute_mean[pid] = avg($diff);
+  @compute_max[pid] = max($diff);
+  @cpu_used_count[cpu] = count();
+  @in[pid, cpu] = nsecs;
+ }
+}
+
+tracepoint:net:net_dev_xmit {
+ $entryts = nsecs;
+ $start = @in[pid, cpu];
+ if($start != 0) {
+  $diff = ($entryts - $start)/1000;
+  @net_max[cpu] = max($diff);
+  @net_histo[cpu] = lhist($diff, 0, 200, 50); 
+  @net_mean[cpu] = avg($diff); 
+  @net_count[cpu] = count();
+ }
+}
+
+END {
+ clear(@obs);
+ //clear(@compute_histo);
+ clear(@in);
+}

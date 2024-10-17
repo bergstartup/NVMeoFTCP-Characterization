@@ -7,10 +7,11 @@ ioengine=io_uring
 fixedbufs=1
 registerfiles=1
 direct=1
+hipri=1
 
 [latency]
 readwrite=${FOP}
-iodepth=1
+iodepth=${FQD}
 numjobs=1
 bs=4k
 cpus_allowed=0

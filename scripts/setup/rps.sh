@@ -3,7 +3,7 @@
 
 #sudo su
 
-echo 32768 > /proc/sys/net/core/rps_sock_flow_entries
+echo $1 > /proc/sys/net/core/rps_sock_flow_entries
 
 # Interface name
 IFACE="ens4np0"
@@ -23,8 +23,8 @@ ethtool -K $IFACE ntuple on
 for f in $(seq 0 $((NUM_CHANNELS-1))); do
     RPS_FLOW_CNT_PATH="/sys/class/net/$IFACE/queues/rx-$f/rps_flow_cnt"
     if [ -w "$RPS_FLOW_CNT_PATH" ]; then
-        echo 512 | sudo tee "$RPS_FLOW_CNT_PATH" > /dev/null
-        echo "Set RPS flow count to 32768 for $RPS_FLOW_CNT_PATH"
+        echo $1 | sudo tee "$RPS_FLOW_CNT_PATH" > /dev/null
+        echo "Set RPS flow count to $1 for $RPS_FLOW_CNT_PATH"
     else
         echo "Error: Cannot write to $RPS_FLOW_CNT_PATH"
     fi

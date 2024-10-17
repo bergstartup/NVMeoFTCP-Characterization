@@ -15,9 +15,7 @@ node = sys.argv[1] #type_fop_bop
 number_of_bprocess = [1]
 block_size_of_bprocess = ["4k"]
 
-RUNS = 3
-LOAD = [10*i for i in range(10)]
-LOAD = [20,40,60,80,100]
+RUNS = 1
 bop = "randread"
 if "bwrite" in node:
     bop = "randwrite"
@@ -30,17 +28,15 @@ if "fwrite" in node:
     runtime = str(5*60)
     warmup = str(5*60)
 
-
-if "ID_TD_SS" in node:
-    number_of_bprocess=[5]
-
-
 if "ID_TS_SD" in node:
-    number_of_bprocess=[2,3,4,5,6]
+    LOAD = [10,20,30,40,50,60,70,80,90]
+    number_of_bprocess=[2]
 
 
 if "ICS_TD_SD" in node:
-    number_of_bprocess=[1,2,3,4,5]
+    LOAD = [50,60,70,80,90]
+    number_of_bprocess=[1]
+
 
 #QD = [2**i for i in range(9)]
 QD = [1, 128]

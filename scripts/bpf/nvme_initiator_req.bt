@@ -1,0 +1,11 @@
+#!/usr/bin/bpftrace
+kfunc:nvme_tcp_queue_rq {
+ $hctx = (struct blk_mq_hw_ctx *)args.hctx;
+ $queue = (struct nvme_tcp_queue*)$hctx->driver_data;
+ $sock = (struct socket*) $queue->sock;
+ $sk = (struct sock*)$sock->sk;
+ $com = $sk->__sk_common;
+ $port = $com.skc_num; 
+ printf("mapd_cpu:%d acpu:%d port:%d\n",$queue->io_cpu,cpu,$port);
+ @tcp_queue_cpu[cpu]++
+}

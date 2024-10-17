@@ -27,11 +27,11 @@ RUNS = 1
 
 
 if "npoll" in node:
-    iouring_type = ["ioup","iou"]
+    iouring_type = ["ioup"]
 
 #For normal performance
 if "perf" in node:
-    number_of_process = [1]
+    number_of_process = [1, 2, 4, 8]
     use_cpu = "0, 1, 2, 3, 4, 5, 6, 7, 8, 9"
     req_size = ["4k"]
     queue_depth = [2**i for i in range(9)]
@@ -42,18 +42,18 @@ if "bench" in node:
     number_of_process = [1, 2, 3, 4, 5]
     use_cpu = "0, 1, 2, 3, 4, 5, 6, 7, 8, 9"
     req_size = ["4k","8k","16k","32k","64k","128k","256k"]
-    queue_depth = [2**i for i in range(9)]
+    queue_depth = [2**i for i in range(11)]
 
 #For tpoll
 if "tpoll" in node:
     number_of_process = [1]
     use_cpu = "0"
     req_size = ["4k"]
-    queue_depth = [1,128]
+    queue_depth = [2**i for i in range(9)]
 
 #For target bottleneck
 if "target" in node:
-    number_of_process = [10]
+    number_of_process = [1, 2, 3, 4, 5]
     use_cpu = "0, 1, 2, 3, 4, 5, 6, 7, 8, 9"
     req_size = ["4k"]
     queue_depth = [128]
