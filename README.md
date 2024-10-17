@@ -29,6 +29,9 @@ cd scripts/benchmark/fio/performance
 python3 crunching.py  
 </pre>
 
+<h1>Graphs</h1>
+To obtain graphs of above experiments
+
 <h2>RQ2: What is the performance overhead of NVMeoF-TCP compared to local NVMe?</h2>
 
 
