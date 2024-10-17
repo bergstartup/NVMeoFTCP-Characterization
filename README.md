@@ -2,11 +2,21 @@
 
 This repository contains experiment setup, scripts and artifacts for my MSc thesis on performance of NVMeoF-TCP.
 
-<h1></h1>
-
 <h1>Setup</h1>
+
+<h1>Initialization</h1>
 <h2>In target</h2>
+<pre>
+#Register NVMe SSDs to the NVMeoF-TCP module
+cd scripts/setup
+./nvmeof_target_init.sh <device> <count>
+#Execute the HTTP server(Blocking) in target for dynamic modification of target configurations for experiments
+cd scripts/monitor
+python3 remoteServer.py
+</pre>
+  
 <h2>In initiator</h2>
+No explicit initialization is required in the initiator as each experiment configures depending on the experiment parameters.
 
 <h1>Experiments</h1>
 <h2>RQ1: What are the performance implications of NVMeoF-TCP configurations?</h2>
@@ -19,6 +29,7 @@ cd scripts/benchmark/fio/performance
 #Creates a lean .json file with required metrics for all experiment
 python3 crunching.py  
 </pre>
+
 <h3>Target polling</h3>
 <pre>
 cd scripts/benchmark/fio/performance
