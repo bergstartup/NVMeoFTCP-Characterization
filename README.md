@@ -14,10 +14,10 @@ To set up the NVMeoF-TCP target:
    ./nvmeof_target_init.sh <device> <count>
    ```
 2. **Start the HTTP server (blocking) for dynamic target configuration during experiments:**
-   \`\`\`bash
+   ```bash
    cd scripts/monitor
    python3 remoteServer.py
-   \`\`\`
+   ```
 
 ### In Initiator
 No explicit initialization is required on the initiator side. Each experiment configures the system based on the specific parameters of the test.
@@ -28,61 +28,61 @@ No explicit initialization is required on the initiator side. Each experiment co
 
 #### Pollable I/O Queues in the Initiator
 To execute experiments related to pollable I/O queues:
-\`\`\`bash
+```bash
 cd scripts/benchmark/fio/performance
 ./poll_npoll.sh
 # Output is stored in observations/performance/
 # Generate a lean .json file with required metrics:
 python3 crunching.py
-\`\`\`
+```
 
 #### Target Polling
 To evaluate target-side polling:
-\`\`\`bash
+```bash
 cd scripts/benchmark/fio/performance
 ./tpoll.sh
 # Output is stored in observations/performance/
 # Generate a lean .json file with required metrics:
 python3 crunching.py
-\`\`\`
+```
 
 ### RQ2: What is the performance overhead of NVMeoF-TCP compared to local NVMe?
 
 #### Local NVMe and NVMeoF-TCP (localhost) Performance
 Run the following commands on the initiator:
-\`\`\`bash
+```bash
 cd scripts/benchmark/fio/performance/
 ./local_bench.sh
 ./local_tcp.sh
-\`\`\`
+```
 
 #### Remote NVMeoF-TCP Performance
 Run the following commands on the target:
-\`\`\`bash
+```bash
 cd scripts/benchmark/fio/performance
 ./remote_bench.sh
 # To copy performance numbers from the initiator:
 ./copy_local.sh
 python3 crunching.py
-\`\`\`
+```
 
 ### RQ3: What is the performance interference with various loads on compute resources in NVMeoF-TCP?
 
 #### Initiator Interference
 Execute the following on the initiator:
-\`\`\`bash
+```bash
 cd scripts/benchmark/fio/qos
 ./initiator.sh
 python3 crunching.py
-\`\`\`
+```
 
 #### Target Interference
 Run these commands on the initiator to evaluate target-side interference:
-\`\`\`bash
+```bash
 cd scripts/benchmark/fio/qos_ns
 ./target.sh
 python3 crunching.py
-\`\`\`
+```
 
 ## Generating Graphs
 
