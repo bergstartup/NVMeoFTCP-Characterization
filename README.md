@@ -32,7 +32,7 @@ cd scripts/benchmark/fio/performance
 ./poll_npoll.sh 
 #fio output are stored in observations/performance/
 #Creates a lean .json file with required metrics for all experiment
-python3 crunching.py  
+python3 crunching.py 
 </pre>
 
 <h3>Target polling</h3>
@@ -49,24 +49,36 @@ python3 crunching.py
 <h2>RQ2: What is the performance overhead of NVMeoF-TCP compared to local NVMe?</h2>
 <h3>For local NVMe and NVMeoF-TCP(localhost) performance numbers</h3>
 <pre>
-  #Run following in the initiator
+  #Run the following in the initiator
   cd scripts/benchmark/fio/performance/
   ./local_bench.sh
   ./local_tcp.sh
 </pre>
 <h3>For remote NVMeoF-TCP performance numbers</h3>
 <pre>
-  #Run following in the target
+  #Run the following in the target
   cd scripts/benchmark/fio/performance
   ./remote_bench.sh
   #To copy performance numbers of local NVMe and NVMeoF-TCP(localhost) from the initiator
   ./copy_local.sh
+  python3 crunching.py
 </pre>
 
 <h2>RQ3: What is the performance interference with various loads on compute resources in NVMeoF-TCP?</h2>
 <h3>Initiator interference</h3>
+<pre>
+  #Run the following in the initiator
+  cd scripts/benchmark/fio/qos
+  ./initiator.sh
+  python3 crunching.py
+</pre>
 <h3>Target interference</h3>
-
+<pre>
+  #Run the following in the initiator
+  cd scripts/benchmark/fio/qos_ns
+  ./target.sh
+  python3 crunching.py
+</pre>
 
 <h1>Graphs</h1>
 To obtain graphs of the above experiments
