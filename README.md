@@ -3,10 +3,23 @@
 This repository contains experiment setup, scripts and artifacts for my MSc thesis on performance of NVMeoF-TCP.
 
 <h1>Setup</h1>
-Passthrough of I/O devices
-Linux 6.8
-2X SSDs
-100 Gbps link
+The hardwre setup from the experiment numbers we obtained the graphs for the thesis
+<table>
+  <tr>
+    <td></td>
+    <td>
+      Initiator
+    </td>
+    <td>
+      Target
+    </td>
+  </tr>
+  <tr>
+    <td>CPU</td>
+    <td>Intel </td>
+    <td>Intel </td>
+  </tr>
+</table>
 
 
 <h1>Initialization</h1>
