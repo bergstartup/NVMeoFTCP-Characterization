@@ -81,4 +81,10 @@ python3 crunching.py
 </pre>
 
 <h1>Graphs</h1>
-To obtain graphs of the above experiments
+To obtain graphs of the above experiments run the following in the initiator
+<ol>
+  <li>Collect the local numbers from the target if required </li>
+  <li>Run crunching.py in performance, qos, qos_ns</li>
+  <li>All the graphs shown in the thesis can be reproduced with collected experiment data visualizer.py in ./observations</li>
+</ol>
+</ol>
