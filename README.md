@@ -3,6 +3,11 @@
 This repository contains experiment setup, scripts and artifacts for my MSc thesis on performance of NVMeoF-TCP.
 
 <h1>Setup</h1>
+Passthrough of I/O devices
+Linux 6.8
+2X SSDs
+100 Gbps link
+
 
 <h1>Initialization</h1>
 <h2>In target</h2>
@@ -14,7 +19,7 @@ cd scripts/setup
 cd scripts/monitor
 python3 remoteServer.py
 </pre>
-  
+
 <h2>In initiator</h2>
 No explicit initialization is required in the initiator as each experiment configures depending on the experiment parameters.
 
@@ -42,7 +47,21 @@ python3 crunching.py
 
 
 <h2>RQ2: What is the performance overhead of NVMeoF-TCP compared to local NVMe?</h2>
-
+<h3>For local NVMe and NVMeoF-TCP(localhost) performance numbers</h3>
+<pre>
+  #Run following in the initiator
+  cd scripts/benchmark/fio/performance/
+  ./local_bench.sh
+  ./local_tcp.sh
+</pre>
+<h3>For remote NVMeoF-TCP performance numbers</h3>
+<pre>
+  #Run following in the target
+  cd scripts/benchmark/fio/performance
+  ./remote_bench.sh
+  #To copy performance numbers of local NVMe and NVMeoF-TCP(localhost) from the initiator
+  ./copy_local.sh
+</pre>
 
 <h2>RQ3: What is the performance interference with various loads on compute resources in NVMeoF-TCP?</h2>
 <h3>Initiator interference</h3>
