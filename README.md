@@ -9,10 +9,10 @@ This repository contains the setup, scripts, and artifacts used for my MSc thesi
 To set up the NVMeoF-TCP target:
 
 1. **Register NVMe SSDs to the NVMeoF-TCP module:**
-   \`\`\`bash
+   ```bash
    cd scripts/setup
    ./nvmeof_target_init.sh <device> <count>
-   \`\`\`
+   ```
 2. **Start the HTTP server (blocking) for dynamic target configuration during experiments:**
    \`\`\`bash
    cd scripts/monitor
