@@ -94,7 +94,7 @@ To generate graphs from the experiment results:
    - `qos`
    - `qos_ns`
 3. **Reproduce all thesis graphs using the experiment data:**
-   \`\`\`bash
+   ```bash
    python3 visualizer.py
-   \`\`\`
+   ```
    Ensure the `visualizer.py` script is run from the `./observations` directory.
