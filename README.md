@@ -2,26 +2,6 @@
 
 This repository contains experiment setup, scripts and artifacts for my MSc thesis on performance of NVMeoF-TCP.
 
-<h1>Setup</h1>
-The hardwre setup from the experiment numbers we obtained the graphs for the thesis
-<table>
-  <tr>
-    <td></td>
-    <td>
-      Initiator
-    </td>
-    <td>
-      Target
-    </td>
-  </tr>
-  <tr>
-    <td>CPU</td>
-    <td>Intel </td>
-    <td>Intel </td>
-  </tr>
-</table>
-
-
 <h1>Initialization</h1>
 <h2>In target</h2>
 <pre>
