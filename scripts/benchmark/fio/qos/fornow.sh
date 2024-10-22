@@ -1,2 +1,0 @@
-./baseline.sh
-./nice.sh
