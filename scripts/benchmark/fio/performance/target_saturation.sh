@@ -4,6 +4,9 @@ sudo nvme disconnect -d /dev/nvme0
 #Set polling
 ../../../setup/nvmeof_tcp_initiator_setup.sh thesis.dev0 10 10
 
+#Set target polling
+curl "http://172.16.137.2:8080/poll?poll=40"
+
 #Without arfs
 ../../../setup/rps.sh 0
 sudo ethtool -K ens4np0 ntuple off 
