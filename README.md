@@ -3,6 +3,33 @@
 
 This repository contains the setup, scripts, and artifacts used for my MSc thesis on the performance characterization of NVMe over Fabrics (NVMeoF) using TCP.
 
+## Software Dependencies
+
+The following software are needed to run the benchmarks and to make the plots:
+- Fio-3.37
+- bpftrace-0.20.2
+- Python 3
+
+## Software and Hardware Configuration
+All benchmarks run on top of Qemu 6.1.0 with KVM enabled.
+
+**Hardware configuration host (Initiator and Target)**
+- 20-core 2.40GHz Intel(R) Xeon(R) Silver 4210R CPU with two sockets connected in NUMA mode. Each socket has ten physical cores and one thread for each core.
+- 252GB of DDR4 RAM
+
+**Hardware configuration VM (Initiator)**
+- 10-core 2.40GHz Intel(R) Xeon(R) Silver 4210R
+- 24GB of DDR4 RAM
+- Passthrough of Mellanox ConnectX-5 NIC
+
+**Hardware configuration VM (Target)**
+- 10-core 2.40GHz Intel(R) Xeon(R) Silver 4210R
+- 24GB of DDR4 RAM
+- Passthrough of Mellanox ConnectX-5 NIC
+- Passthrough of 2X Western Digital SN540 SSD
+
+The initiator and the target should have a 100Gbps link connected through the Mellanox NIC. The QEMU VM process, memory, and all peripherals should be pinned to the same NUMA domain in the host, both the initiator and target. The Operating System used in the VM is Ubuntu 24.04 with Linux Kernel 6.8.0.
+
 ## Initialization
 
 ### In Target
