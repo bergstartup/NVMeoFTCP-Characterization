@@ -6,7 +6,7 @@ sudo nvme disconnect -d /dev/nvme0
 
 #Without arfs
 ../../../setup/rps.sh 0
-sudo ethtool -K ens4np0 ntuple off 
+sudo ethtool -K $2 ntuple off 
 
 curl "http://$1:8080/poll?poll=0"
 python3 fio_runner.py remote_tpoll0
