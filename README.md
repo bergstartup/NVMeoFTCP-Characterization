@@ -57,14 +57,14 @@ No explicit initialization is required on the initiator side. Each experiment co
 To execute experiments related to pollable I/O queues:
 ```bash
 cd scripts/benchmark/fio/performance
-./polling_queues.sh
+./polling_queues.sh <target_ip> <initiator_network_interface>
 ```
 
 #### Target Polling
 To evaluate target-side polling:
 ```bash
 cd scripts/benchmark/fio/performance
-./target_polling.sh
+./target_polling.sh <target_ip> <initiator_network_interface>
 ```
 
 ### RQ2: What is the performance overhead of NVMeoF-TCP compared to local NVMe?
@@ -80,7 +80,7 @@ cd scripts/benchmark/fio/performance/
 Run the following commands on the target:
 ```bash
 cd scripts/benchmark/fio/performance
-./remote_bench.sh
+./remote_bench.sh <target_ip> <initiator_network_interface>
 ```
 
 ### RQ3: What is the performance interference with various loads on compute resources in NVMeoF-TCP?
@@ -89,14 +89,14 @@ cd scripts/benchmark/fio/performance
 Execute the following on the initiator:
 ```bash
 cd scripts/benchmark/fio/qos
-./initiator.sh
+./initiator.sh <target_ip> <initiator_network_interface>
 ```
 
 #### Target Interference
 Run these commands on the initiator to evaluate target-side interference:
 ```bash
 cd scripts/benchmark/fio/qos_ns
-./target.sh
+./target.sh <target_ip> <initiator_network_interface>
 ```
 
 ## Generating Graphs
