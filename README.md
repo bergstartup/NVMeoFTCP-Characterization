@@ -57,20 +57,14 @@ No explicit initialization is required on the initiator side. Each experiment co
 To execute experiments related to pollable I/O queues:
 ```bash
 cd scripts/benchmark/fio/performance
-./poll_npoll.sh
-# Output is stored in observations/performance/
-# Generate a lean .json file with required metrics:
-python3 crunching.py
+./polling_queues.sh
 ```
 
 #### Target Polling
 To evaluate target-side polling:
 ```bash
 cd scripts/benchmark/fio/performance
-./tpoll.sh
-# Output is stored in observations/performance/
-# Generate a lean .json file with required metrics:
-python3 crunching.py
+./target_polling.sh
 ```
 
 ### RQ2: What is the performance overhead of NVMeoF-TCP compared to local NVMe?
@@ -80,7 +74,6 @@ Run the following commands on the initiator:
 ```bash
 cd scripts/benchmark/fio/performance/
 ./local_bench.sh
-./local_tcp.sh
 ```
 
 #### Remote NVMeoF-TCP Performance
@@ -88,9 +81,6 @@ Run the following commands on the target:
 ```bash
 cd scripts/benchmark/fio/performance
 ./remote_bench.sh
-# To copy performance numbers from the initiator:
-./copy_local.sh
-python3 crunching.py
 ```
 
 ### RQ3: What is the performance interference with various loads on compute resources in NVMeoF-TCP?
@@ -100,7 +90,6 @@ Execute the following on the initiator:
 ```bash
 cd scripts/benchmark/fio/qos
 ./initiator.sh
-python3 crunching.py
 ```
 
 #### Target Interference
@@ -108,17 +97,16 @@ Run these commands on the initiator to evaluate target-side interference:
 ```bash
 cd scripts/benchmark/fio/qos_ns
 ./target.sh
-python3 crunching.py
 ```
 
 ## Generating Graphs
 
 To generate graphs from the experiment results:
 
-1. **Collect local performance data from the target (if needed).**
+1. **Collect local performance data from the target present in observations directory (if needed).**
 2. **Run `crunching.py` in each of the following directories:**
    - `performance`
    - `qos`
    - `qos_ns`
 3. **Reproduce all thesis graphs using the experiment data:**
-   Use visualizer.ipynb for reproducing the graphs
+   Use visualizer.ipynb in observations directory for reproducing the graphs
