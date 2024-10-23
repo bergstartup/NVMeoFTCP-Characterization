@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #Continue configuration from RQ1
-curl "http://172.16.137.2:8080/poll?poll=40"
+curl "http://$1:8080/poll?poll=40"
 
 sudo nvme disconnect -d /dev/nvme0
 
@@ -25,7 +25,7 @@ line_number=1
 q=0
 while read -r port; do
 	id=$line_number
-	curl "http://172.16.137.2:8080/fctrl?port=$port&id=$id&q=$q"
+	curl "http://$1:8080/fctrl?port=$port&id=$id&q=$q"
 	line_number=$(expr $line_number + 1)
 done < ports
 
@@ -46,7 +46,7 @@ line_number=22
 q=1
 while read -r port; do
         id=$line_number
-        curl "http://172.16.137.2:8080/fctrl?port=$port&id=$id&q=$q"
+        curl "http://$1:8080/fctrl?port=$port&id=$id&q=$q"
         q=$(( (q % 9) + 1 ))
 	line_number=$(expr $line_number + 1)
 done < ports
@@ -64,4 +64,4 @@ python3 fio_runner.py remote_ICS_TD_SD_nopoll_bread_fread
 
 #Remove flow control in target
 lines=43
-curl "http://172.16.137.2:8080/remfctrl?total=$lines"
+curl "http://$1:8080/remfctrl?total=$lines"
